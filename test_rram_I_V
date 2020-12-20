@@ -1,0 +1,41 @@
+python_random.seed(1)
+seed(1)
+tf.random.set_seed(1)
+os.environ['PYTHONHASHSEED'] = '0'
+plt.close("all")
+ttt='2'
+a=pd.read_csv('CSV_data/ds_rram_test_rnseed' +ttt +'.csv')
+
+b=a.values
+
+x_test=b[:,0:b.shape[1]-1]
+y_test=b[:,10]
+
+x_test=scaler1.transform(x_test)
+x_test=x_test.reshape((-1,5,2))
+y_test=scaler2.transform(y_test.reshape((-1,1)))
+
+y_test_predict=regressor.predict(x_test)
+plt.figure(1)
+plt.plot(y_test,'b',y_test_predict,'r')
+
+# rram IV
+xx_v=scaler1.inverse_transform(x_test.reshape(-1,10))
+xx_v=(xx_v[:,8]).reshape((-1,1))
+yy_I=scaler2.inverse_transform(y_test)
+yy_I_pred=scaler2.inverse_transform(y_test_predict)
+plt.figure(2)
+plt.plot(xx_v,yy_I,'s')
+plt.plot(xx_v,yy_I_pred,'+')
+
+
+# regression
+
+plt.figure(3)
+plt.plot([-1e-3,1e-3],[-1e-3,1e-3],'b')
+plt.plot(yy_I,yy_I_pred,'+')
+
+df = pd.DataFrame (np.concatenate( (xx_v, yy_I, yy_I_pred)  ,axis=1 ) )
+filepath = './PaperData/RandomWalk/Test' +ttt +'.csv'
+
+df.to_csv(filepath, header=['V_test','I_test','I_test_predict'] ,index=False)

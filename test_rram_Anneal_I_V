@@ -1,0 +1,68 @@
+
+python_random.seed(1)
+seed(1)
+tf.random.set_seed(1)
+os.environ['PYTHONHASHSEED'] = '0'
+
+plt.close("all")
+
+rndseed='2'
+a1=pd.read_csv('./CSV_data/Anneal/ds0_rram_rndseed' + rndseed+  '.csv')
+a2=pd.read_csv('./CSV_data/Anneal//ds300_rram_rndseed'+ rndseed+ '.csv')
+a3=pd.read_csv('./CSV_data/Anneal//ds400_rram_rndseed'+ rndseed+ '.csv')
+a4=pd.read_csv('./CSV_data/Anneal//ds500_rram_rndseed'+ rndseed+ '.csv')
+
+b1=a1.values
+b2=a2.values
+b3=a3.values
+b4=a4.values
+
+b=np.concatenate((b1,b2,b3,b4),axis=0);
+
+x_test=b[:,0:b.shape[1]-1]
+y_test=b[:,15]
+
+x_test=scaler1.transform(x_test)
+x_test=x_test.reshape((-1,5,3))
+y_test=scaler2.transform(y_test.reshape((-1,1)))
+
+y_test_predict=regressor.predict(x_test)
+
+plt.plot(y_test,'b',y_test_predict,'r')
+
+
+xx_v=scaler1.inverse_transform(x_test.reshape(-1,15))
+xx_v=(xx_v[:,13]).reshape((-1,1))
+yy_I=scaler2.inverse_transform(y_test)
+yy_I_pred=scaler2.inverse_transform(y_test_predict)
+
+ty=3
+xx_vt=xx_v[9996*ty:9996*(ty+1),:]
+yy_It=yy_I[9996*ty:9996*(ty+1),:]
+yy_I_predt=yy_I_pred[9996*ty:9996*(ty+1),:]
+
+
+
+
+
+# rram IV
+plt.figure(2)
+plt.plot(xx_vt,yy_It,'s')
+plt.plot(xx_vt,yy_I_predt,'+')
+
+
+# regression
+
+plt.figure(3)
+plt.plot([-1e-3,1e-3],[-1e-3,1e-3],'b')
+plt.plot(yy_It,yy_I_predt,'+')
+
+
+
+df = pd.DataFrame (np.concatenate( (xx_v, yy_I, yy_I_pred)  ,axis=1 ) )
+filepath = './PaperData/Anneal/Test_rndseed_'+ rndseed + '.csv'
+
+df.to_csv(filepath, header=['V_test','I_test','I_test_predict'] ,index=False)
+
+
+
